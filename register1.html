@@ -1,15 +1,133 @@
 <!DOCTYPE html>
 <html>
 <head>
+   <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+   <script type="application/json" src=https://maps.googleapis.com/maps/api/js?key=AIzaSyC9cwbKnz2iZqFWazHkaqyigA40tSK3s5g&libraries=visualization,drawing"></script>
+   <script type="text/javascript">
+var pos;
+var newLat, newLng;
+ var jsonObject = {
+      "name": "John",
+      "age": 31,
+      "city": "New York"
+    };
+ jQuery(function($) {
+   // Asynchronously Load the map API
+     var script = document.createElement('script');
+     script.src = "https://maps.googleapis.com/maps/api/js?key=AIzaSyC9cwbKnz2iZqFWazHkaqyigA40tSK3s5g&libraries=visualization&callback=initialize";
+     document.body.appendChild(script);
+     
+    });
+ function initialize() {     
+    var map = new google.maps.Map(document.getElementById('map'), {
+    center: {lat: 37.897, lng: -122.544},
+    zoom: 14
+});
+var infoWindow = new google.maps.InfoWindow({map: null});
+
+// Try HTML5 geolocation.
+if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(function(position) {
+            pos = {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+        };
+       // document.write(pos.lat.toFixed(3)+"<br />");
+        infoWindow.setPosition(pos);
+        var ll  = new google.maps.LatLng(pos); // capture lat/lng location
+       // infoWindow.setContent('Location found: ' + pos.lat.toFixed(3) + ', ' + pos.lng.toFixed(3));
+        const marker = new google.maps.Marker({
+          position: pos,
+          draggable: true,
+          map,
+          title: "Drag Me",
+          animation: google.maps.Animation.DROP, 
+        });
+        map.setCenter(pos);
+        google.maps.event.addListener(marker, 'dragend', function(ev){ // set listener event for marker drag
+       // alert(ll.lat() + ' ' + ll.lng()); // always the same LatLng-Object...
+        var newPos = marker.getPosition(); // fetch new position
+     //   document.getElementById("myPos").innerHTML = newPos; // store new position
+        newLat = marker.getPosition().lat().toFixed(3);
+        newLng = marker.getPosition().lng().toFixed(3);
+        document.getElementById("myPos").innerHTML = newLat + ', ' + newLng; // store new position
+           
+/       //alert('New position is ' + lat + ', ' + lng); // new LatLng-Object after dragend-event...
+        });
+    }, function() {
+        handleLocationError(true, infoWindow, map.getCenter());
+    });
+} else {
+    // Browser doesn't support Geolocation
+    handleLocationError(false, infoWindow, map.getCenter());
+}
+
+function handleLocationError(browserHasGeolocation, infoWindow, pos) {
+    infoWindow.setPosition(pos);
+    infoWindow.setContent(browserHasGeolocation ?
+                          'Error: The Geolocation service failed.' :
+                          'Error: Your browser doesn\'t support geolocation.');
+}
+ }
+ 
+ function validateFormOnSubmit(theForm) {
+    
+    var x = document.getElementById('email');
+    var y = document.getElementById('psw');
+     
+    alert(x.value + ", " + y.value);
+    saveTextAsFile();
+}
+
+function download() {
+                var fileContents=JSON.stringify(jsonObject, null, 2);
+                var fileName= "data.json";
+
+                var pp = document.createElement('a');
+                pp.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(fileContents));
+                pp.setAttribute('download', fileName);
+                pp.click();
+            }
+            setTimeout(function() {download()}, 500);
+            
+$('#download').on("click", function() {
+  function download() {
+   
+    var fileContents = JSON.stringify(jsonObject, null, 2);
+    var fileName = "data.json";
+
+    var pp = document.createElement('a');
+    pp.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(fileContents));
+    pp.setAttribute('download', fileName);
+    pp.click();
+  }
+  setTimeout(function() {
+    download()
+  }, 500);
+});
+ 
+ </script>
+   
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
 body {
   font-family: Arial, Helvetica, sans-serif;
-  background-color: black;
+  background-color: white;
 }
 
 * {
   box-sizing: border-box;
+}
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+#map {
+   
+    left: 2%;
+    height: 30%;
+    width: 30%;
 }
 
 /* Add padding to containers */
@@ -68,11 +186,14 @@ a {
 </style>
 </head>
 <body>
-
-<form action="/action_page.php">
+  <h1>BackpAQ AQView Sensor Registration</h1>
+<div id="map"></div>
+<h6>&nbsp&nbsp&nbsp&nbsp Drag marker to desired sensor position</h4>
+<h3>&nbsp&nbsp&nbsp Your new position is:  <span id="myPos"></span></h3>
+  <form action="javascript:;" id="myForm" onsubmit="validateFormOnSubmit(myForm)">  <!-- now you have it! -->
   <div class="container">
-    <h1>BackpAQ AQView Sensor Registration</h1><br>
-    <p>Please fill in this form to register your sensor.</p>
+     
+   <br> <p>Please fill in this form to register your sensor.</p>
     <hr>
 
     <label for="email"><b>Email</b></label>
@@ -90,9 +211,6 @@ a {
     <label for="sensor-type"><b>Sensor Type</b></label>
     <input type="text" placeholder="Enter Sensor Type" name="sensor-type" id="sensor-type" required>
     
-    <label for="sensor-location"><b>Sensor Location</b></label>
-    <input type="text" placeholder="Enter Sensor Location (Latitude,Longitude)" name="sensor-location" id="sonsor-location" required>
-    
     <label for="channel-num"><b>ThingSpeak Channel #</b></label>
     <input type="text" placeholder="Enter ThingSpeak Channel #" name="channel-num" id="channel-num" required>
     
@@ -106,10 +224,12 @@ a {
   </div>
   
   <div class="container signin">
+    
     <p>Already have an account? <a href="#">Sign in</a>.</p>
   </div>
+ 
 </form>
-
+<button id="download">Download me</button>
 </body>
 </html>
 
