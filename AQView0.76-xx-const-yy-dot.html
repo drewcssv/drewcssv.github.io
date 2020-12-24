@@ -1321,7 +1321,7 @@ jQuery(document).ready(function()
      channelsLoaded++;
      window.console && console.log('channels Loaded:',channelsLoaded);
      window.console && console.log('channel index:',channelIndex);
-     if (channelsLoaded==channelKeys.length){createChart(); HideSome(); }
+     if (channelsLoaded==channelKeys.length){createChart(); HideSome() }
 	 })
    .fail(function() { alert('getJSON request failed! '); });
  }
